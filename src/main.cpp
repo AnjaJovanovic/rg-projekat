@@ -23,13 +23,13 @@ void processInput(GLFWwindow *window);
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
 unsigned int loadCubemap(vector<std::string> faces);
+unsigned int loadTexture(char const *path);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 // camera
-
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -161,15 +161,17 @@ int main() {
     // -------------------------
     Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
     Shader skyboxShader("resources/shaders/skybox.vs", "resources/shaders/skybox.fs");
+    Shader blendingShader("resources/shaders/blending.vs", "resources/shaders/blending.fs");
 
     // load models
     // -----------
-    Model ourModel("resources/objects/backpack/backpack.obj");
+    //Model ourModel("resources/objects/backpack/backpack.obj");
+    Model ourModel("resources/objects/airplane/piper_pa18.obj");
     ourModel.SetShaderTextureNamePrefix("material.");
 
     PointLight& pointLight = programState->pointLight;
     pointLight.position = glm::vec3(4.0f, 4.0, 0.0);
-    pointLight.ambient = glm::vec3(0.1, 0.1, 0.1);
+    pointLight.ambient = glm::vec3(2.0, 2.0, 2.0);
     pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
     pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
 
@@ -223,6 +225,31 @@ int main() {
             1.0f, -1.0f,  1.0f
     };
 
+    // rain vertices
+    float transparentVertices[] = {
+            // positions         // texture Coords
+            0.0f,  0.5f,  0.0f,  0.0f,  1.0f,
+            0.0f, -0.5f,  0.0f,  0.0f,  0.0f,
+            1.0f, -0.5f,  0.0f,  1.0f,  0.0f,
+
+            0.0f,  0.5f,  0.0f,  0.0f,  1.0f,
+            1.0f, -0.5f,  0.0f,  1.0f,  0.0f,
+            1.0f,  0.5f,  0.0f,  1.0f,  1.0f
+    };
+
+    // rain positions
+    vector<glm::vec3> rainPositions;
+    vector<float> rainRotation;
+
+    for (int i = 0; i < 40000; i++) {
+        float x = static_cast<float>(rand() % 201 - 100); // x koordinate u rasponu [-100, 100]
+        float y = static_cast<float>(rand() % 101) * 0.1f; // y koordinate u rasponu [0, 10]
+        float z = static_cast<float>(rand() % 201 - 100); // z koordinate u rasponu [-100, 100]
+
+        rainPositions.push_back(glm::vec3(x, y, z));
+        rainRotation.push_back(static_cast<float>(i % 180)); // Rotacija u rasponu [0, 179]
+    }
+
     // skybox VAO VBO
     unsigned int skyboxVAO, skyboxVBO;
     glGenVertexArrays(1, &skyboxVAO);
@@ -233,18 +260,34 @@ int main() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
+    // transparent VAO VBO
+    unsigned int transparentVAO, transparentVBO;
+    glGenVertexArrays(1, &transparentVAO);
+    glGenBuffers(1, &transparentVBO);
+    glBindVertexArray(transparentVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, transparentVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(transparentVertices), transparentVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
+
+    // load textures
+    // -------------
+    // rain texture
+    unsigned int rainTexture = loadTexture(FileSystem::getPath("resources/textures/rain.png").c_str());
+
     // skybox textures
     stbi_set_flip_vertically_on_load(false);
-
     vector<std::string> faces = {
 
-            FileSystem::getPath("resources/textures/clouds/east.bmp"),
-            FileSystem::getPath("resources/textures/clouds/west.bmp"),
-            FileSystem::getPath("resources/textures/clouds/up.bmp"),
-            FileSystem::getPath("resources/textures/clouds/down.bmp"),
-            FileSystem::getPath("resources/textures/clouds/north.bmp"),
-            FileSystem::getPath("resources/textures/clouds/south.bmp")
-
+            FileSystem::getPath("resources/textures/skybox/px.jpg"),
+            FileSystem::getPath("resources/textures/skybox/nx.jpg"),
+            FileSystem::getPath("resources/textures/skybox/py.jpg"),
+            FileSystem::getPath("resources/textures/skybox/ny.jpg"),
+            FileSystem::getPath("resources/textures/skybox/pz.jpg"),
+            FileSystem::getPath("resources/textures/skybox/nz.jpg")
     };
     unsigned int cubemapTexture = loadCubemap(faces);
 
@@ -252,6 +295,8 @@ int main() {
     // --------------------
     skyboxShader.use();
     skyboxShader.setInt("skybox",0);
+    blendingShader.use();
+    blendingShader.setInt("texture1", 0);
 
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -302,6 +347,24 @@ int main() {
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
 
+        // rain
+        blendingShader.use();
+        glm::mat4 rainM = glm::mat4(1.0f);
+        blendingShader.setMat4("projection", projection);
+        blendingShader.setMat4("view", view);
+        glBindVertexArray(transparentVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, rainTexture);
+        for (unsigned int i = 0; i < 40000; i++) {
+            rainM = glm::mat4(1.0f);
+            rainM = glm::scale(rainM, glm::vec3(0.8f));
+            rainM = glm::translate(rainM, rainPositions[i]);
+            rainM = glm::rotate(rainM ,glm::radians(rainRotation[i]), glm::vec3(0.0f ,1.0f, 0.0f));
+            blendingShader.setMat4("model", rainM);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+        }
+        glEnable(GL_CULL_FACE);
+
         // draw skybox
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
         skyboxShader.use();
@@ -331,7 +394,7 @@ int main() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-    
+
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glDeleteVertexArrays(1, &skyboxVAO);
@@ -465,6 +528,41 @@ unsigned int loadCubemap(vector<std::string> faces)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    return textureID;
+}
+
+unsigned int loadTexture(char const *path)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height, nrComponents;
+    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+    if (data){
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else{
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+        stbi_image_free(data);
+    }
 
     return textureID;
 }

@@ -429,12 +429,6 @@ void processInput(GLFWwindow *window) {
         programState->camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         programState->camera.ProcessKeyboard(RIGHT, deltaTime);
-
-    // change airplane position
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        programState->airplanePosition += glm:: vec3(0.0f,1.3f,0.0f);
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        programState->airplanePosition -= glm:: vec3(0.0f,1.3f,0.0f);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes

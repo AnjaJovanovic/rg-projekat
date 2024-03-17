@@ -54,13 +54,13 @@ struct ProgramState {
     bool ImGuiEnabled = false;
     Camera camera;
     bool CameraMouseMovementUpdateEnabled = true;
-    glm::vec3 backpackPosition = glm::vec3(0.0f);
-    glm::vec3 airplanePosition = glm::vec3(0.0f);
-    float backpackScale = 1.0f;
-    float airplaneScale = 1.0f;
+    glm::vec3 islandPosition = glm::vec3(0.0f, -40.0f, 0.0f);
+    glm::vec3 airplanePosition = glm::vec3(0.0f, 60.0f, 30.0f);
+    float islandScale = 0.7f;
+    float airplaneScale = 1.5f;
     PointLight pointLight;
     ProgramState()
-            : camera(glm::vec3(0.0f, 0.0f, 3.0f)) {}
+            : camera(glm::vec3(0.0f, 0.0f, 0.0f)) {}
 
     void SaveToFile(std::string filename);
 
@@ -137,7 +137,7 @@ int main() {
     }
 
     // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(false);
 
     programState = new ProgramState;
     programState->LoadFromFile("resources/program_state.txt");
@@ -171,6 +171,10 @@ int main() {
     // airplane
     Model airplane("resources/objects/airplane/piper_pa18.obj");
     airplane.SetShaderTextureNamePrefix("material.");
+
+    // island
+    Model island("resources/objects/SmallTropicalIsland/Small_Tropical_Island.obj");
+    island.SetShaderTextureNamePrefix("material.");
 
     PointLight& pointLight = programState->pointLight;
     pointLight.position = glm::vec3(4.0f, 4.0, 0.0);
@@ -231,22 +235,22 @@ int main() {
     // rain vertices
     float transparentVertices[] = {
             // positions         // texture Coords
-            0.0f,  0.5f,  0.0f,  0.0f,  1.0f,
-            0.0f, -0.5f,  0.0f,  0.0f,  0.0f,
-            1.0f, -0.5f,  0.0f,  1.0f,  0.0f,
+            0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
+            0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+            1.0f,  0.5f,  0.0f,  1.0f,  0.0f,
 
-            0.0f,  0.5f,  0.0f,  0.0f,  1.0f,
-            1.0f, -0.5f,  0.0f,  1.0f,  0.0f,
-            1.0f,  0.5f,  0.0f,  1.0f,  1.0f
+            0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
+            1.0f,  0.5f,  0.0f,  1.0f,  0.0f,
+            1.0f, -0.5f,  0.0f,  1.0f,  1.0f
     };
 
     // rain positions
     vector<glm::vec3> rainPositions;
     vector<float> rainRotation;
 
-    for (int i = 0; i < 50000; i++) {
+    for (int i = 0; i < 10000; i++) {
         float x = static_cast<float>(rand() % 201 - 100); // x koordinate u rasponu [-100, 100]
-        float y = static_cast<float>(rand() % 601 - 100) * 0.1f; // y koordinate u rasponu [-10, 50]
+        float y = static_cast<float>(rand() % 301 - 100) * 0.1f; // y koordinate u rasponu [-10, 20]
         float z = static_cast<float>(rand() % 201 - 100); // z koordinate u rasponu [-100, 100]
 
         rainPositions.push_back(glm::vec3(x, y, z));
@@ -291,6 +295,14 @@ int main() {
             FileSystem::getPath("resources/textures/skybox/ny.jpg"),
             FileSystem::getPath("resources/textures/skybox/pz.jpg"),
             FileSystem::getPath("resources/textures/skybox/nz.jpg")
+
+
+            /*FileSystem::getPath("resources/textures/skycube_tga/skyrender0001.tga"),
+            FileSystem::getPath("resources/textures/skycube_tga/skyrender0004.tga"),
+            FileSystem::getPath("resources/textures/skycube_tga/skyrender0003.tga"),
+            FileSystem::getPath("resources/textures/skycube_tga/skyrender0006.tga"),
+            FileSystem::getPath("resources/textures/skycube_tga/skyrender0005.tga"),
+            FileSystem::getPath("resources/textures/skycube_tga/skyrender0002.tga"),*/
     };
     unsigned int cubemapTexture = loadCubemap(faces);
 
@@ -337,7 +349,7 @@ int main() {
         ourShader.setFloat("material.shininess", 32.0f);
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(programState->camera.Zoom),
-                                                (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
+                                                (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 1000.0f);
         glm::mat4 view = programState->camera.GetViewMatrix();
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
@@ -357,6 +369,14 @@ int main() {
         ourShader.setMat4("model", airplaneModel);
         airplane.Draw(ourShader);
 
+        //island
+        glm::mat4 islandModel = glm::mat4(1.0f);
+        islandModel = glm::translate(islandModel,
+                               programState->islandPosition); // translate it down so it's at the center of the scene
+        islandModel = glm::scale(islandModel, glm::vec3(programState->islandScale));    // it's a bit too big for our scene, so scale it down
+        islandModel = glm::rotate(islandModel, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        ourShader.setMat4("model", islandModel);
+        island.Draw(ourShader);
 
         // rain
         blendingShader.use();
@@ -366,8 +386,8 @@ int main() {
         glBindVertexArray(transparentVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, rainTexture);
-        for (unsigned int i = 0; i < 50000; i++) {
-            rainM = glm::mat4(1.0f);
+        for (unsigned int i = 0; i < 10000; i++) {
+            rainM = glm::mat4(0.8f);
             rainM = glm::scale(rainM, glm::vec3(1.0f));
             rainM = glm::translate(rainM, rainPositions[i]);
             rainM = glm::rotate(rainM ,glm::radians(rainRotation[i]), glm::vec3(0.0f ,1.0f, 0.0f));
@@ -422,13 +442,13 @@ void processInput(GLFWwindow *window) {
         glfwSetWindowShouldClose(window, true);
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        programState->camera.ProcessKeyboard(FORWARD, deltaTime);
+        programState->camera.ProcessKeyboard(FORWARD, 0.20);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        programState->camera.ProcessKeyboard(BACKWARD, deltaTime);
+        programState->camera.ProcessKeyboard(BACKWARD, 0.20);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        programState->camera.ProcessKeyboard(LEFT, deltaTime);
+        programState->camera.ProcessKeyboard(LEFT, 0.20);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        programState->camera.ProcessKeyboard(RIGHT, deltaTime);
+        programState->camera.ProcessKeyboard(RIGHT, 0.20);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes

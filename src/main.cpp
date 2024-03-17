@@ -51,16 +51,29 @@ struct PointLight {
     float quadratic;
 };
 
+struct DirLight {
+    glm::vec3 direction;
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+};
+
+
 struct ProgramState {
     glm::vec3 clearColor = glm::vec3(0);
     bool ImGuiEnabled = false;
     Camera camera;
     bool CameraMouseMovementUpdateEnabled = true;
-    glm::vec3 islandPosition = glm::vec3(0.0f, -40.0f, 0.0f);
-    glm::vec3 airplanePosition = glm::vec3(0.0f, 60.0f, 30.0f);
+
+    glm::vec3 islandPosition = glm::vec3(0.0f, -100.0f, 0.0f);
     float islandScale = 0.7f;
-    float airplaneScale = 1.5f;
+
+    glm::vec3 airplanePosition = glm::vec3(0.0f, 150.0f, 30.0f);
+    float airplaneScale = 3.5f;
+
     PointLight pointLight;
+    DirLight dirLight;
+
     ProgramState()
             : camera(glm::vec3(0.0f, 0.0f, 0.0f)) {}
 
@@ -163,7 +176,7 @@ int main() {
 
     // build and compile shaders
     // -------------------------
-    Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
+    Shader ourShader("resources/shaders/model.vs", "resources/shaders/model.fs");
     Shader skyboxShader("resources/shaders/skybox.vs", "resources/shaders/skybox.fs");
     Shader blendingShader("resources/shaders/blending.vs", "resources/shaders/blending.fs");
 
@@ -250,9 +263,9 @@ int main() {
     vector<glm::vec3> rainPositions;
     vector<float> rainRotation;
 
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 50000; i++) {
         float x = static_cast<float>(rand() % 201 - 100); // x koordinate u rasponu [-100, 100]
-        float y = static_cast<float>(rand() % 301 - 100) * 0.1f; // y koordinate u rasponu [-10, 20]
+        float y = static_cast<float>(rand() % 301 - 100); // y koordinate u rasponu [-10, 20]
         float z = static_cast<float>(rand() % 201 - 100); // z koordinate u rasponu [-100, 100]
 
         rainPositions.push_back(glm::vec3(x, y, z));
@@ -289,14 +302,14 @@ int main() {
 
     // skybox textures
     stbi_set_flip_vertically_on_load(false);
-    vector<std::string> faces = {
+    vector<std::string> facesSunny = {
 
-            FileSystem::getPath("resources/textures/skybox/px.jpg"),
-            FileSystem::getPath("resources/textures/skybox/nx.jpg"),
-            FileSystem::getPath("resources/textures/skybox/py.jpg"),
-            FileSystem::getPath("resources/textures/skybox/ny.jpg"),
-            FileSystem::getPath("resources/textures/skybox/pz.jpg"),
-            FileSystem::getPath("resources/textures/skybox/nz.jpg")
+            FileSystem::getPath("resources/textures/skyboxSun/px.jpg"),
+            FileSystem::getPath("resources/textures/skyboxSun/nx.jpg"),
+            FileSystem::getPath("resources/textures/skyboxSun/py.jpg"),
+            FileSystem::getPath("resources/textures/skyboxSun/ny.jpg"),
+            FileSystem::getPath("resources/textures/skyboxSun/pz.jpg"),
+            FileSystem::getPath("resources/textures/skyboxSun/nz.jpg")
 
 
             /*FileSystem::getPath("resources/textures/skycube_tga/skyrender0001.tga"),
@@ -306,14 +319,33 @@ int main() {
             FileSystem::getPath("resources/textures/skycube_tga/skyrender0005.tga"),
             FileSystem::getPath("resources/textures/skycube_tga/skyrender0002.tga"),*/
     };
-    unsigned int cubemapTexture = loadCubemap(faces);
+
+    vector<std::string> facesRainy = {
+
+            FileSystem::getPath("resources/textures/skybox/px.jpg"),
+            FileSystem::getPath("resources/textures/skybox/nx.jpg"),
+            FileSystem::getPath("resources/textures/skybox/py.jpg"),
+            FileSystem::getPath("resources/textures/skybox/ny.jpg"),
+            FileSystem::getPath("resources/textures/skybox/pz.jpg"),
+            FileSystem::getPath("resources/textures/skybox/nz.jpg")
+
+    };
+    unsigned int cubemapTextureRainy = loadCubemap(facesRainy);
+    unsigned int cubemapTextureSunny = loadCubemap(facesSunny);
 
     // shader configuration
     // --------------------
     skyboxShader.use();
     skyboxShader.setInt("skybox",0);
+
     blendingShader.use();
     blendingShader.setInt("texture1", 0);
+
+    DirLight& dirLight = programState->dirLight;
+    dirLight.direction = glm::vec3(0.0f, -30.0f, -42.0f);
+    dirLight.ambient = glm::vec3(0.3f);
+    dirLight.diffuse = glm::vec3( 0.3f);
+    dirLight.specular = glm::vec3(0.3f);
 
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -331,7 +363,6 @@ int main() {
         // -----
         processInput(window);
 
-
         // render
         // ------
         glClearColor(programState->clearColor.r, programState->clearColor.g, programState->clearColor.b, 1.0f);
@@ -339,6 +370,8 @@ int main() {
 
         // don't forget to enable shader before setting uniforms
         ourShader.use();
+
+        // Point light
         pointLight.position = glm::vec3(4.0 * cos(currentFrame), 4.0f, 4.0 * sin(currentFrame));
         ourShader.setVec3("pointLight.position", pointLight.position);
         ourShader.setVec3("pointLight.ambient", pointLight.ambient);
@@ -349,6 +382,13 @@ int main() {
         ourShader.setFloat("pointLight.quadratic", pointLight.quadratic);
         ourShader.setVec3("viewPosition", programState->camera.Position);
         ourShader.setFloat("material.shininess", 32.0f);
+
+        // Directional light
+        ourShader.setVec3("dirLight.direction", dirLight.direction);
+        ourShader.setVec3("dirLight.ambient", dirLight.ambient);
+        ourShader.setVec3("dirLight.diffuse", dirLight.diffuse);
+        ourShader.setVec3("dirLight.specular", dirLight.specular);
+
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(programState->camera.Zoom),
                                                 (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 1000.0f);
@@ -389,9 +429,9 @@ int main() {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, rainTexture);
         if(rainy) {
-            for (unsigned int i = 0; i < 10000; i++) {
+            for (unsigned int i = 0; i < 50000; i++) {
                 rainM = glm::mat4(0.8f);
-                rainM = glm::scale(rainM, glm::vec3(1.0f));
+                rainM = glm::scale(rainM, glm::vec3(4.0f));
                 rainM = glm::translate(rainM, rainPositions[i]);
                 rainM = glm::rotate(rainM ,glm::radians(rainRotation[i]), glm::vec3(0.0f ,1.0f, 0.0f));
                 blendingShader.setMat4("model", rainM);
@@ -409,7 +449,13 @@ int main() {
         // skybox cube
         glBindVertexArray(skyboxVAO);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+        if(rainy) {
+            glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureRainy);
+        } else {
+            glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureSunny);
+        }
+
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         glDepthFunc(GL_LESS); // set depth function back to default

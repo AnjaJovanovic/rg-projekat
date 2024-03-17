@@ -47,8 +47,8 @@ Ka 0 0 0
 Kd 1 1 1
 Ks 0.6 0.6 0.6
 Km 0
-map_Kd /Maps/Small_Palm_Leaf0.jpg
-map_D /Maps/Small_Palm_Leaf1.jpg
+map_Kd Small_Palm_Leaf0.jpg
+map_D Small_Palm_Leaf1.jpg
 
 newmtl default_Small_Palms
 d 1

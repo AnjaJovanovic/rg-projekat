@@ -25,6 +25,8 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 unsigned int loadCubemap(vector<std::string> faces);
 unsigned int loadTexture(char const *path);
 
+bool rainy = false;
+
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -386,13 +388,15 @@ int main() {
         glBindVertexArray(transparentVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, rainTexture);
-        for (unsigned int i = 0; i < 10000; i++) {
-            rainM = glm::mat4(0.8f);
-            rainM = glm::scale(rainM, glm::vec3(1.0f));
-            rainM = glm::translate(rainM, rainPositions[i]);
-            rainM = glm::rotate(rainM ,glm::radians(rainRotation[i]), glm::vec3(0.0f ,1.0f, 0.0f));
-            blendingShader.setMat4("model", rainM);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+        if(rainy) {
+            for (unsigned int i = 0; i < 10000; i++) {
+                rainM = glm::mat4(0.8f);
+                rainM = glm::scale(rainM, glm::vec3(1.0f));
+                rainM = glm::translate(rainM, rainPositions[i]);
+                rainM = glm::rotate(rainM ,glm::radians(rainRotation[i]), glm::vec3(0.0f ,1.0f, 0.0f));
+                blendingShader.setMat4("model", rainM);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
         }
         glEnable(GL_CULL_FACE);
 
@@ -528,6 +532,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         } else {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
+    }
+    if(key == GLFW_KEY_R && action == GLFW_PRESS) {
+        rainy = !rainy;
     }
 }
 

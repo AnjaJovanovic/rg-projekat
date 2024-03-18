@@ -26,6 +26,7 @@ unsigned int loadCubemap(vector<std::string> faces);
 unsigned int loadTexture(char const *path);
 
 bool rainy = false;
+bool lampOn = false;
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -58,7 +59,6 @@ struct DirLight {
     glm::vec3 specular;
 };
 
-
 struct ProgramState {
     glm::vec3 clearColor = glm::vec3(0);
     bool ImGuiEnabled = false;
@@ -68,8 +68,11 @@ struct ProgramState {
     glm::vec3 islandPosition = glm::vec3(0.0f, -100.0f, 0.0f);
     float islandScale = 0.7f;
 
-    glm::vec3 airplanePosition = glm::vec3(0.0f, 150.0f, 30.0f);
+    glm::vec3 airplanePosition = glm::vec3(200.0f, 150.0f, 30.0f);
     float airplaneScale = 3.5f;
+
+    glm::vec3 lampPosition = glm::vec3(-10.0f, -80.0f, -10.0f);
+    float lampScale = 10.0f;
 
     PointLight pointLight;
     DirLight dirLight;
@@ -191,15 +194,11 @@ int main() {
     Model island("resources/objects/SmallTropicalIsland/Small_Tropical_Island.obj");
     island.SetShaderTextureNamePrefix("material.");
 
-    PointLight& pointLight = programState->pointLight;
-    pointLight.position = glm::vec3(4.0f, 4.0, 0.0);
-    pointLight.ambient = glm::vec3(2.0, 2.0, 2.0);
-    pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
-    pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
+    // lamp
+    Model lamp("resources/objects/Street_lamp_7_OBJ/Street_Lamp_7.obj");
+    lamp.SetShaderTextureNamePrefix("material.");
 
-    pointLight.constant = 1.0f;
-    pointLight.linear = 0.09f;
-    pointLight.quadratic = 0.032f;
+    PointLight& pointLight = programState->pointLight;
 
     // Skybox vertices
     float skyboxVertices[] = {
@@ -263,9 +262,9 @@ int main() {
     vector<glm::vec3> rainPositions;
     vector<float> rainRotation;
 
-    for (int i = 0; i < 50000; i++) {
+    for (int i = 0; i < 30000; i++) {
         float x = static_cast<float>(rand() % 201 - 100); // x koordinate u rasponu [-100, 100]
-        float y = static_cast<float>(rand() % 301 - 100); // y koordinate u rasponu [-10, 20]
+        float y = static_cast<float>(rand() % 401 - 200); // y koordinate u rasponu [-200, 200]
         float z = static_cast<float>(rand() % 201 - 100); // z koordinate u rasponu [-100, 100]
 
         rainPositions.push_back(glm::vec3(x, y, z));
@@ -322,12 +321,12 @@ int main() {
 
     vector<std::string> facesRainy = {
 
-            FileSystem::getPath("resources/textures/skybox/px.jpg"),
-            FileSystem::getPath("resources/textures/skybox/nx.jpg"),
-            FileSystem::getPath("resources/textures/skybox/py.jpg"),
-            FileSystem::getPath("resources/textures/skybox/ny.jpg"),
-            FileSystem::getPath("resources/textures/skybox/pz.jpg"),
-            FileSystem::getPath("resources/textures/skybox/nz.jpg")
+            FileSystem::getPath("resources/textures/skyboxRain/px.jpg"),
+            FileSystem::getPath("resources/textures/skyboxRain/nx.jpg"),
+            FileSystem::getPath("resources/textures/skyboxRain/py.jpg"),
+            FileSystem::getPath("resources/textures/skyboxRain/ny.jpg"),
+            FileSystem::getPath("resources/textures/skyboxRain/pz.jpg"),
+            FileSystem::getPath("resources/textures/skyboxRain/nz.jpg")
 
     };
     unsigned int cubemapTextureRainy = loadCubemap(facesRainy);
@@ -342,10 +341,6 @@ int main() {
     blendingShader.setInt("texture1", 0);
 
     DirLight& dirLight = programState->dirLight;
-    dirLight.direction = glm::vec3(0.0f, -30.0f, -42.0f);
-    dirLight.ambient = glm::vec3(0.3f);
-    dirLight.diffuse = glm::vec3( 0.3f);
-    dirLight.specular = glm::vec3(0.3f);
 
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -372,7 +367,20 @@ int main() {
         ourShader.use();
 
         // Point light
-        pointLight.position = glm::vec3(4.0 * cos(currentFrame), 4.0f, 4.0 * sin(currentFrame));
+        if (lampOn) {
+            pointLight.ambient = glm::vec3(15.0, 15.0, 15.0);
+            pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
+            pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
+        } else {
+            pointLight.ambient = glm::vec3(0.0, 0.0, 0.0);
+            pointLight.diffuse = glm::vec3(0.0, 0.0, 0.0);
+            pointLight.specular = glm::vec3(0.0, 0.0, 0.0);
+        }
+
+        pointLight.constant = 14.0f;
+        pointLight.linear = 0.09f;
+        pointLight.quadratic = 0.032f;
+
         ourShader.setVec3("pointLight.position", pointLight.position);
         ourShader.setVec3("pointLight.ambient", pointLight.ambient);
         ourShader.setVec3("pointLight.diffuse", pointLight.diffuse);
@@ -384,6 +392,17 @@ int main() {
         ourShader.setFloat("material.shininess", 32.0f);
 
         // Directional light
+        if(rainy) {
+            dirLight.direction = glm::vec3(0.0f, -30.0f, -42.0f);
+            dirLight.ambient = glm::vec3(0.25f);
+            dirLight.diffuse = glm::vec3( 0.25f);
+            dirLight.specular = glm::vec3(0.25f);
+        } else {
+            dirLight.direction = glm::vec3(0.0f, -30.0f, -42.0f);
+            dirLight.ambient = glm::vec3(0.3f);
+            dirLight.diffuse = glm::vec3( 0.3f);
+            dirLight.specular = glm::vec3(0.3f);
+        }
         ourShader.setVec3("dirLight.direction", dirLight.direction);
         ourShader.setVec3("dirLight.ambient", dirLight.ambient);
         ourShader.setVec3("dirLight.diffuse", dirLight.diffuse);
@@ -411,7 +430,7 @@ int main() {
         ourShader.setMat4("model", airplaneModel);
         airplane.Draw(ourShader);
 
-        //island
+        // island
         glm::mat4 islandModel = glm::mat4(1.0f);
         islandModel = glm::translate(islandModel,
                                programState->islandPosition); // translate it down so it's at the center of the scene
@@ -419,6 +438,15 @@ int main() {
         islandModel = glm::rotate(islandModel, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         ourShader.setMat4("model", islandModel);
         island.Draw(ourShader);
+
+        // lamp
+        glm::mat4 lampModel = glm::mat4(1.0f);
+        lampModel = glm::translate(lampModel,
+                                     programState->lampPosition); // translate it down so it's at the center of the scene
+        lampModel = glm::scale(lampModel, glm::vec3(programState->lampScale));    // it's a bit too big for our scene, so scale it down
+        lampModel = glm::rotate(lampModel, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        ourShader.setMat4("model", lampModel);
+        lamp.Draw(ourShader);
 
         // rain
         blendingShader.use();
@@ -428,10 +456,20 @@ int main() {
         glBindVertexArray(transparentVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, rainTexture);
+        float rainSpeed = 0.1f; // Brzina pada kiše
         if(rainy) {
-            for (unsigned int i = 0; i < 50000; i++) {
-                rainM = glm::mat4(0.8f);
-                rainM = glm::scale(rainM, glm::vec3(4.0f));
+            for (unsigned int i = 0; i < 30000; i++) {
+                // Ažuriranje pozicije kišnih kapljica
+                rainPositions[i].y -= rainSpeed;
+
+                // Provera da li je kapljica van granica ekrana
+                if (rainPositions[i].y < -50.0f) {
+                    // Ako je van granica, postavite je na vrh ekrana
+                    rainPositions[i].y = 50.0f;
+                }
+
+                rainM = glm::mat4(1.0f);
+                rainM = glm::scale(rainM, glm::vec3(1.5f));
                 rainM = glm::translate(rainM, rainPositions[i]);
                 rainM = glm::rotate(rainM ,glm::radians(rainRotation[i]), glm::vec3(0.0f ,1.0f, 0.0f));
                 blendingShader.setMat4("model", rainM);
@@ -581,6 +619,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     }
     if(key == GLFW_KEY_R && action == GLFW_PRESS) {
         rainy = !rainy;
+    }
+    if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+        lampOn = !lampOn;
     }
 }
 

@@ -37,7 +37,7 @@ Kd 1 1 1
 Ks 0.6 0.6 0.6
 Km 0
 map_Kd Leaf_CoconutGre0_01.jpg
-map_D Leaf_CoconutGre1.jpg
+map_d Leaf_CoconutGre1.jpg
 
 newmtl default_ferns
 d 1
@@ -48,7 +48,7 @@ Kd 1 1 1
 Ks 0.6 0.6 0.6
 Km 0
 map_Kd Small_Palm_Leaf0.jpg
-map_D Small_Palm_Leaf1.jpg
+map_d Small_Palm_Leaf1.jpg
 
 newmtl default_Small_Palms
 d 1
@@ -59,7 +59,7 @@ Kd 1 1 1
 Ks 0.6 0.6 0.6
 Km 0
 map_Kd Small_Palm_Leaf0.jpg
-map_D Small_Palm_Leaf1.jpg
+map_d Small_Palm_Leaf1.jpg
 
 newmtl default_house
 d 1

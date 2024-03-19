@@ -26,7 +26,7 @@ unsigned int loadCubemap(vector<std::string> faces);
 unsigned int loadTexture(char const *path);
 
 bool rainy = false;
-bool lampOn = false;
+bool lampOn = true;
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -198,7 +198,17 @@ int main() {
     Model lamp("resources/objects/Street_lamp_7_OBJ/Street_Lamp_7.obj");
     lamp.SetShaderTextureNamePrefix("material.");
 
+    DirLight& dirLight = programState->dirLight;
+
     PointLight& pointLight = programState->pointLight;
+    pointLight.position = glm::vec3(-10.8f, -59.0, -9.56);
+    pointLight.ambient = glm::vec3(10.0, 10.0, 10.0);
+    pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
+    pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
+
+    pointLight.constant = 14.0f;
+    pointLight.linear = 0.09f;
+    pointLight.quadratic = 0.032f;
 
     // Skybox vertices
     float skyboxVertices[] = {
@@ -309,14 +319,6 @@ int main() {
             FileSystem::getPath("resources/textures/skyboxSun/ny.jpg"),
             FileSystem::getPath("resources/textures/skyboxSun/pz.jpg"),
             FileSystem::getPath("resources/textures/skyboxSun/nz.jpg")
-
-
-            /*FileSystem::getPath("resources/textures/skycube_tga/skyrender0001.tga"),
-            FileSystem::getPath("resources/textures/skycube_tga/skyrender0004.tga"),
-            FileSystem::getPath("resources/textures/skycube_tga/skyrender0003.tga"),
-            FileSystem::getPath("resources/textures/skycube_tga/skyrender0006.tga"),
-            FileSystem::getPath("resources/textures/skycube_tga/skyrender0005.tga"),
-            FileSystem::getPath("resources/textures/skycube_tga/skyrender0002.tga"),*/
     };
 
     vector<std::string> facesRainy = {
@@ -339,8 +341,6 @@ int main() {
 
     blendingShader.use();
     blendingShader.setInt("texture1", 0);
-
-    DirLight& dirLight = programState->dirLight;
 
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -368,18 +368,10 @@ int main() {
 
         // Point light
         if (lampOn) {
-            pointLight.ambient = glm::vec3(15.0, 15.0, 15.0);
-            pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
-            pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
+            pointLight.ambient = glm::vec3(10.0, 10.0, 10.0);
         } else {
             pointLight.ambient = glm::vec3(0.0, 0.0, 0.0);
-            pointLight.diffuse = glm::vec3(0.0, 0.0, 0.0);
-            pointLight.specular = glm::vec3(0.0, 0.0, 0.0);
         }
-
-        pointLight.constant = 14.0f;
-        pointLight.linear = 0.09f;
-        pointLight.quadratic = 0.032f;
 
         ourShader.setVec3("pointLight.position", pointLight.position);
         ourShader.setVec3("pointLight.ambient", pointLight.ambient);

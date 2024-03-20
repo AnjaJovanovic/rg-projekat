@@ -177,6 +177,11 @@ int main() {
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
 
+    // Face culling
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+
     // build and compile shaders
     // -------------------------
     Shader ourShader("resources/shaders/model.vs", "resources/shaders/model.fs");

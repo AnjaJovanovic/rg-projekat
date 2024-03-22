@@ -27,6 +27,10 @@ unsigned int loadTexture(char const *path);
 
 bool rainy = false;
 bool lampOn = true;
+bool planeCrash = false;
+glm::vec3 currentAirplanePosition;
+glm::mat4 currentAirplaneRotation = glm::mat4(1.0f);
+float airplaneHeight = -95.0;
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -68,7 +72,7 @@ struct ProgramState {
     glm::vec3 islandPosition = glm::vec3(0.0f, -100.0f, 0.0f);
     float islandScale = 0.7f;
 
-    glm::vec3 airplanePosition = glm::vec3(200.0f, 150.0f, 30.0f);
+    glm::vec3 airplanePosition = glm::vec3(200.0f, 250.0f, 30.0f);
     float airplaneScale = 3.5f;
 
     glm::vec3 lampPosition = glm::vec3(-10.0f, -80.0f, -10.0f);
@@ -351,7 +355,7 @@ int main() {
     blendingShader.use();
     blendingShader.setInt("texture1", 0);
 
-    // draw in wireframe
+    //draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // render loop
@@ -422,12 +426,41 @@ int main() {
         // airplane
         glm::mat4 airplaneModel = glm::mat4(1.0f);
         airplaneModel = glm::translate(airplaneModel, programState->airplanePosition);
-        glm::vec3 rotationCenter = glm::vec3(30, 10, 10);
-        glm::mat4 translateToOrigin = glm::translate(glm::mat4(1.0f), -rotationCenter);
-        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), (float)currentFrame, glm::vec3(0.0f, 1.0f, 0.0f));
-        glm::mat4 translateBack = glm::translate(glm::mat4(1.0f), rotationCenter);
-        airplaneModel = translateBack * rotationMatrix * translateToOrigin;
-        airplaneModel = glm::scale(airplaneModel, glm::vec3(programState->airplaneScale));
+
+        if (planeCrash == false) {
+            glm::vec3 rotationCenter = glm::vec3(30, 10, 10);
+            glm::mat4 translateToOrigin = glm::translate(glm::mat4(1.0f), -rotationCenter);
+            glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), (float) currentFrame, glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::mat4 translateBack = glm::translate(glm::mat4(1.0f), rotationCenter);
+            airplaneModel = translateBack * rotationMatrix * translateToOrigin;
+            airplaneModel = glm::scale(airplaneModel, glm::vec3(programState->airplaneScale));
+            currentAirplanePosition = glm::vec3(airplaneModel[3]);
+            currentAirplaneRotation = rotationMatrix;
+        } else {
+            // Airplane falling down
+            airplaneModel = glm::scale(airplaneModel, glm::vec3(programState->airplaneScale));
+            glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(40.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            airplaneModel *= rotationMatrix;
+            airplaneModel *= currentAirplaneRotation;
+            programState->airplanePosition = currentAirplanePosition;
+
+            if (currentAirplanePosition.y > airplaneHeight) {
+                if (currentAirplaneRotation[0][0] > 0 && currentAirplaneRotation[1][1] > 0) {
+                    // Prvi kvadrant
+                } else if (currentAirplaneRotation[0][0] < 0 && currentAirplaneRotation[1][1] > 0) {
+                    // Drugi kvadrant
+                    glm::mat4 correctionRotation = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+                    airplaneModel *= correctionRotation;
+                } else if (currentAirplaneRotation[0][0] < 0 && currentAirplaneRotation[1][1] < 0) {
+                    // Treći kvadrant
+                    glm::mat4 correctionRotation = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+                    airplaneModel *= correctionRotation;
+                } else if (currentAirplaneRotation[0][0] > 0 && currentAirplaneRotation[1][1] < 0) {
+                    // Četvrti kvadrant
+                }
+                currentAirplanePosition += glm::vec3(0.4f, -0.6f, 0.06f);
+            }
+        }
         ourShader.setMat4("model", airplaneModel);
         airplane.Draw(ourShader);
 
@@ -628,6 +661,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_P && action == GLFW_PRESS) {
         lampOn = !lampOn;
     }
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
+        planeCrash = !planeCrash;
+    }
 }
 
 unsigned int loadCubemap(vector<std::string> faces)
@@ -693,6 +729,5 @@ unsigned int loadTexture(char const *path)
         std::cout << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
     }
-
     return textureID;
 }

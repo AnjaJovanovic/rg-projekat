@@ -26,6 +26,8 @@ unsigned int loadCubemap(vector<std::string> faces);
 unsigned int loadTexture(char const *path);
 
 bool rainy = false;
+bool sunny = true;
+bool storm = false;
 bool lampOn = true;
 bool planeCrash = false;
 glm::vec3 currentAirplanePosition;
@@ -333,7 +335,6 @@ int main() {
             FileSystem::getPath("resources/textures/skyboxSun/pz.jpg"),
             FileSystem::getPath("resources/textures/skyboxSun/nz.jpg")
     };
-
     vector<std::string> facesRainy = {
 
             FileSystem::getPath("resources/textures/skyboxRain/px.jpg"),
@@ -344,8 +345,19 @@ int main() {
             FileSystem::getPath("resources/textures/skyboxRain/nz.jpg")
 
     };
+    vector<std::string> facesStorm = {
+
+            FileSystem::getPath("resources/textures/skyboxStorm/px.jpg"),
+            FileSystem::getPath("resources/textures/skyboxStorm/nx.jpg"),
+            FileSystem::getPath("resources/textures/skyboxStorm/py.jpg"),
+            FileSystem::getPath("resources/textures/skyboxStorm/ny.jpg"),
+            FileSystem::getPath("resources/textures/skyboxStorm/pz.jpg"),
+            FileSystem::getPath("resources/textures/skyboxStorm/nz.jpg")
+
+    };
     unsigned int cubemapTextureRainy = loadCubemap(facesRainy);
     unsigned int cubemapTextureSunny = loadCubemap(facesSunny);
+    unsigned int cubemapTextureStorm = loadCubemap(facesStorm);
 
     // shader configuration
     // --------------------
@@ -402,11 +414,16 @@ int main() {
             dirLight.ambient = glm::vec3(0.25f);
             dirLight.diffuse = glm::vec3( 0.25f);
             dirLight.specular = glm::vec3(0.25f);
-        } else {
+        } else if(sunny) {
             dirLight.direction = glm::vec3(0.0f, -30.0f, -42.0f);
             dirLight.ambient = glm::vec3(0.3f);
             dirLight.diffuse = glm::vec3( 0.3f);
             dirLight.specular = glm::vec3(0.3f);
+        } else {
+            dirLight.direction = glm::vec3(0.0f, -30.0f, -42.0f);
+            dirLight.ambient = glm::vec3(0.0f);
+            dirLight.diffuse = glm::vec3( 0.2f);
+            dirLight.specular = glm::vec3(0.2f);
         }
         ourShader.setVec3("dirLight.direction", dirLight.direction);
         ourShader.setVec3("dirLight.ambient", dirLight.ambient);
@@ -491,7 +508,7 @@ int main() {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, rainTexture);
         float rainSpeed = 0.1f; // Brzina pada kiše
-        if(rainy) {
+        if(rainy || storm) {
             for (unsigned int i = 0; i < 30000; i++) {
                 // Ažuriranje pozicije kišnih kapljica
                 rainPositions[i].y -= rainSpeed;
@@ -503,7 +520,11 @@ int main() {
                 }
 
                 rainM = glm::mat4(1.0f);
-                rainM = glm::scale(rainM, glm::vec3(1.5f));
+                if(rainy)
+                    rainM = glm::scale(rainM, glm::vec3(1.5f));
+                else
+                    rainM = glm::scale(rainM, glm::vec3(2.0f));
+                
                 rainM = glm::translate(rainM, rainPositions[i]);
                 rainM = glm::rotate(rainM ,glm::radians(rainRotation[i]), glm::vec3(0.0f ,1.0f, 0.0f));
                 blendingShader.setMat4("model", rainM);
@@ -524,8 +545,10 @@ int main() {
 
         if(rainy) {
             glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureRainy);
-        } else {
+        } else if (sunny){
             glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureSunny);
+        } else {
+            glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureStorm);
         }
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -655,8 +678,17 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
     }
-    if(key == GLFW_KEY_R && action == GLFW_PRESS) {
-        rainy = !rainy;
+    if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+        if (rainy) {
+            rainy = false;
+            storm = true;
+        } else if (sunny) {
+            sunny = false;
+            rainy = true;
+        } else {
+            storm = false;
+            sunny = true;
+        }
     }
     if (key == GLFW_KEY_P && action == GLFW_PRESS) {
         lampOn = !lampOn;

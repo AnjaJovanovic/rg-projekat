@@ -25,14 +25,22 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 unsigned int loadCubemap(vector<std::string> faces);
 unsigned int loadTexture(char const *path);
 
+// weather settings
 bool rainy = false;
 bool sunny = true;
 bool storm = false;
+
 bool lampOn = true;
+
+// airplane settings
 bool planeCrash = false;
 glm::vec3 currentAirplanePosition;
 glm::mat4 currentAirplaneRotation = glm::mat4(1.0f);
 float airplaneHeight = -95.0;
+
+//lightning settings
+int randomLightningSpawn = 30;
+int lightningFrameDuration = 0;
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -76,6 +84,9 @@ struct ProgramState {
 
     glm::vec3 airplanePosition = glm::vec3(200.0f, 250.0f, 30.0f);
     float airplaneScale = 3.5f;
+
+    glm::vec3 boatPosition = glm::vec3(100.0f, -95.0f, 140.0f);
+    float boatScale = 1.0f;
 
     glm::vec3 lampPosition = glm::vec3(-10.0f, -80.0f, -10.0f);
     float lampScale = 10.0f;
@@ -205,6 +216,10 @@ int main() {
     Model airplane("resources/objects/airplane/piper_pa18.obj");
     airplane.SetShaderTextureNamePrefix("material.");
 
+    // boat
+    Model boat("resources/objects/OldBoat/OldBoat.obj");
+    boat.SetShaderTextureNamePrefix("material.");
+
     // island
     Model island("resources/objects/SmallTropicalIsland/Small_Tropical_Island.obj");
     island.SetShaderTextureNamePrefix("material.");
@@ -271,7 +286,7 @@ int main() {
             1.0f, -1.0f,  1.0f
     };
 
-    // rain vertices
+    // transparent vertices
     float transparentVertices[] = {
             // positions         // texture Coords
             0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
@@ -321,8 +336,12 @@ int main() {
 
     // load textures
     // -------------
+
     // rain texture
     unsigned int rainTexture = loadTexture(FileSystem::getPath("resources/textures/rain.png").c_str());
+
+    // lightning texture
+    unsigned int lightningTexture = loadTexture(FileSystem::getPath("resources/textures/lighting.png").c_str());
 
     // skybox textures
     stbi_set_flip_vertically_on_load(false);
@@ -375,6 +394,7 @@ int main() {
     while (!glfwWindowShouldClose(window)) {
         // per-frame time logic
         // --------------------
+        //randomLightningSpawn = rand()%15;
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -420,8 +440,12 @@ int main() {
             dirLight.diffuse = glm::vec3( 0.3f);
             dirLight.specular = glm::vec3(0.3f);
         } else {
+            if(storm && lightningFrameDuration == 0) {
+                dirLight.ambient = glm::vec3(0.1f);
+            } else {
+                dirLight.ambient = glm::vec3(0.0f);
+            }
             dirLight.direction = glm::vec3(0.0f, -30.0f, -42.0f);
-            dirLight.ambient = glm::vec3(0.0f);
             dirLight.diffuse = glm::vec3( 0.2f);
             dirLight.specular = glm::vec3(0.2f);
         }
@@ -481,6 +505,15 @@ int main() {
         ourShader.setMat4("model", airplaneModel);
         airplane.Draw(ourShader);
 
+        // boat
+        glm::mat4 boatModel = glm::mat4(1.0f);
+        boatModel = glm::translate(boatModel,
+                                   programState->boatPosition); // translate it down so it's at the center of the scene
+        boatModel = glm::scale(boatModel, glm::vec3(programState->boatScale));    // it's a bit too big for our scene, so scale it down
+        boatModel = glm::rotate(boatModel, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        ourShader.setMat4("model", boatModel);
+        boat.Draw(ourShader);
+
         // island
         glm::mat4 islandModel = glm::mat4(1.0f);
         islandModel = glm::translate(islandModel,
@@ -532,6 +565,31 @@ int main() {
             }
         }
         glEnable(GL_CULL_FACE);
+
+        // lightning
+        blendingShader.use();
+        glm::mat4 lightningM = glm::mat4(1.0f);
+        blendingShader.setMat4("projection", projection);
+        blendingShader.setMat4("view", view);
+        glBindVertexArray(transparentVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, lightningTexture);
+        if(storm && lightningFrameDuration == 0) {
+            lightningM = glm::mat4(1.0f);
+            lightningM = glm::scale(lightningM, glm::vec3(200.0f, rand() % 200 + 600.0f, 200.0f));
+            float x = rand() % 6;
+            float z = rand() % 6;
+            lightningM = glm::translate(lightningM, glm::vec3(x-2.5 ,0.3f, z-2.5));
+            lightningM = glm::rotate(lightningM,glm::radians(90.0f), glm::vec3(0.0f ,1.0f, 0.0f));
+            blendingShader.setMat4("model", lightningM);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+        }
+        glEnable(GL_CULL_FACE);
+
+        randomLightningSpawn = 60 + rand() % 50;
+        lightningFrameDuration++;
+        if(lightningFrameDuration > randomLightningSpawn)
+            lightningFrameDuration = 0;
 
         // draw skybox
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content

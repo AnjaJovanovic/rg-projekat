@@ -426,6 +426,7 @@ int main() {
         ourShader.setFloat("pointLight.linear", pointLight.linear);
         ourShader.setFloat("pointLight.quadratic", pointLight.quadratic);
         ourShader.setVec3("viewPosition", programState->camera.Position);
+        ourShader.setVec3("lightPos", pointLight.position);
         ourShader.setFloat("material.shininess", 32.0f);
 
         // Directional light

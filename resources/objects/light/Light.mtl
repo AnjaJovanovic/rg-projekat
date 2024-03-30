@@ -1,0 +1,26 @@
+# Blender 3.6.0 MTL File: 'Light.blend'
+# www.blender.org
+
+newmtl Glass
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.520000
+d 1.000000
+illum 2
+map_Kd Glass_Blender_Base_color.jpg
+map_Ns Glass_Roughness.jpg
+map_refl Glass_Metallic.jpg
+map_Bump -bm 1.000000 Glass_Normal_OpenGL.png
+
+newmtl Light
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Light_Base_color.jpg
+map_Ks Light_Specular_level.jpg
+map_Ns Light_Roughness.jpg
+map_refl Light_Metallic.jpg
+map_Bump -bm 1.000000 Light_Normal_OpenGL.png

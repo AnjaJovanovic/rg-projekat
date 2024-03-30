@@ -23,7 +23,8 @@ void processInput(GLFWwindow *window);
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
 unsigned int loadCubemap(vector<std::string> faces);
-unsigned int loadTexture(char const *path);
+unsigned int loadTexture(const char *path, bool gammaCorrection);
+void renderQuad();
 
 // weather settings
 bool rainy = false;
@@ -45,6 +46,7 @@ int lightningFrameDuration = 0;
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+float heightScale = 0.1;
 
 // camera
 float lastX = SCR_WIDTH / 2.0f;
@@ -85,13 +87,23 @@ struct ProgramState {
     glm::vec3 airplanePosition = glm::vec3(200.0f, 250.0f, 30.0f);
     float airplaneScale = 3.5f;
 
-    glm::vec3 boatPosition = glm::vec3(100.0f, -95.0f, 140.0f);
+    glm::vec3 boatPosition = glm::vec3(100.0f, -97.0f, 120.0f);
     float boatScale = 1.0f;
 
     glm::vec3 lampPosition = glm::vec3(-10.0f, -80.0f, -10.0f);
     float lampScale = 10.0f;
 
+    glm::vec3 tablePosition = glm::vec3(-5.0f, -77.0f, 11.0f);
+    float tableScale = 4.0f;
+
+    glm::vec3 chairPosition = glm::vec3(-5.0f, -77.0f, 8.0f);
+    float chairScale = 4.0f;
+
+    glm::vec3 houseLampPosition = glm::vec3(-13.0f, -71.0f, 9.0f);
+    float houseLampScale = 4.0f;
+
     PointLight pointLight;
+    PointLight pointLightHouse;
     DirLight dirLight;
 
     ProgramState()
@@ -198,16 +210,17 @@ int main() {
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
 
-    // Face culling
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
+        // Face culling
+        /*glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glFrontFace(GL_CCW);*/
 
     // build and compile shaders
     // -------------------------
     Shader ourShader("resources/shaders/model.vs", "resources/shaders/model.fs");
     Shader skyboxShader("resources/shaders/skybox.vs", "resources/shaders/skybox.fs");
     Shader blendingShader("resources/shaders/blending.vs", "resources/shaders/blending.fs");
+    Shader parallaxShader("resources/shaders/parallax_mapping.vs", "resources/shaders/parallax_mapping.fs");
 
     // load models
     // -----------
@@ -228,10 +241,26 @@ int main() {
     Model lamp("resources/objects/Street_lamp_7_OBJ/Street_Lamp_7.obj");
     lamp.SetShaderTextureNamePrefix("material.");
 
+    // table
+    Model table("resources/objects/WoodenTable/Table.obj");
+    table.SetShaderTextureNamePrefix("material.");
+
+    // chair
+    Model chair("resources/objects/WoodenTable/Chair.obj");
+    chair.SetShaderTextureNamePrefix("material.");
+
+    // house lamp
+    Model houselamp("resources/objects/light/Light.obj");
+    houselamp.SetShaderTextureNamePrefix("material.");
+
+    // Directional light
+    // -----------------
     DirLight& dirLight = programState->dirLight;
 
+    // Point light
+    // -----------
     PointLight& pointLight = programState->pointLight;
-    pointLight.position = glm::vec3(-10.8f, -59.0, -9.56);
+    pointLight.position = glm::vec3(-10.8f, -59.0f, -9.56f);
     pointLight.ambient = glm::vec3(10.0, 10.0, 10.0);
     pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
     pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
@@ -239,6 +268,15 @@ int main() {
     pointLight.constant = 14.0f;
     pointLight.linear = 0.09f;
     pointLight.quadratic = 0.032f;
+
+    PointLight& pointLightHouse = programState->pointLightHouse;
+    pointLightHouse.position = glm::vec3(-11.8f, -71.0f, 8.0f);
+    pointLightHouse.diffuse = glm::vec3(0.3, 0.3, 0.3);
+    pointLightHouse.specular = glm::vec3(0.1, 0.1, 0.1);
+
+    pointLightHouse.constant = 1.0f;
+    pointLightHouse.linear = 0.09f;
+    pointLightHouse.quadratic = 0.032f;
 
     // Skybox vertices
     float skyboxVertices[] = {
@@ -338,11 +376,16 @@ int main() {
     // -------------
 
     // rain texture
-    unsigned int rainTexture = loadTexture(FileSystem::getPath("resources/textures/rain.png").c_str());
+    unsigned int rainTexture = loadTexture(FileSystem::getPath("resources/textures/rain.png").c_str(), true);
 
-    // lightning texture
-    unsigned int lightningTexture = loadTexture(FileSystem::getPath("resources/textures/lighting.png").c_str());
+    // lightning texture)
+    unsigned int lightningTexture = loadTexture(FileSystem::getPath("resources/textures/lighting.png").c_str(), true);
 
+    // floor texture
+    unsigned int diffuseMap = loadTexture(FileSystem::getPath("resources/textures/floor/wood_0041_color_2k.jpg").c_str(), true);
+    unsigned int normalMap  = loadTexture(FileSystem::getPath("resources/textures/floor/wood_0041_normal_opengl_2k.png").c_str(), true);
+    unsigned int heightMap  = loadTexture(FileSystem::getPath("resources/textures/floor/wood_0041_height_2k.png").c_str(), true);
+    
     // skybox textures
     stbi_set_flip_vertically_on_load(false);
     vector<std::string> facesSunny = {
@@ -386,6 +429,11 @@ int main() {
     blendingShader.use();
     blendingShader.setInt("texture1", 0);
 
+    parallaxShader.use();
+    parallaxShader.setInt("diffuseMap", 0);
+    parallaxShader.setInt("normalMap", 1);
+    parallaxShader.setInt("depthMap", 2);
+
     //draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -412,6 +460,8 @@ int main() {
         ourShader.use();
 
         // Point light
+        // -----------
+        //outdoor
         if (lampOn) {
             pointLight.ambient = glm::vec3(10.0, 10.0, 10.0);
         } else {
@@ -428,6 +478,25 @@ int main() {
         ourShader.setVec3("viewPosition", programState->camera.Position);
         ourShader.setVec3("lightPos", pointLight.position);
         ourShader.setFloat("material.shininess", 32.0f);
+
+        // house
+        ourShader.setVec3("pointLightHouse.position", pointLightHouse.position);
+        ourShader.setVec3("pointLightHouse.ambient", pointLightHouse.ambient);
+        ourShader.setVec3("pointLightHouse.diffuse", pointLightHouse.diffuse);
+        ourShader.setVec3("pointLightHouse.specular", pointLightHouse.specular);
+        ourShader.setFloat("pointLightHouse.constant", pointLightHouse.constant);
+        ourShader.setFloat("pointLightHouse.linear", pointLightHouse.linear);
+        ourShader.setFloat("pointLightHouse.quadratic", pointLightHouse.quadratic);
+        ourShader.setVec3("viewPosition", programState->camera.Position);
+        ourShader.setVec3("lightPos", pointLightHouse.position);
+        ourShader.setFloat("material.shininess", 32.0f);
+
+        if (lampOn) {
+            pointLightHouse.ambient = glm::vec3(0.05f, 0.025f, 0.03f);
+        } else {
+            pointLightHouse.ambient = glm::vec3(0.0, 0.0, 0.0);
+        }
+
 
         // Directional light
         if(rainy) {
@@ -511,7 +580,7 @@ int main() {
         boatModel = glm::translate(boatModel,
                                    programState->boatPosition); // translate it down so it's at the center of the scene
         boatModel = glm::scale(boatModel, glm::vec3(programState->boatScale));    // it's a bit too big for our scene, so scale it down
-        boatModel = glm::rotate(boatModel, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        boatModel = glm::rotate(boatModel, glm::radians(-35.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         ourShader.setMat4("model", boatModel);
         boat.Draw(ourShader);
 
@@ -532,6 +601,107 @@ int main() {
         lampModel = glm::rotate(lampModel, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         ourShader.setMat4("model", lampModel);
         lamp.Draw(ourShader);
+
+        // table
+        glm::mat4 tableModel = glm::mat4(1.0f);
+        tableModel = glm::translate(tableModel,
+                                   programState->tablePosition); // translate it down so it's at the center of the scene
+        tableModel = glm::scale(tableModel, glm::vec3(programState->tableScale));    // it's a bit too big for our scene, so scale it down
+        tableModel = glm::rotate(tableModel, glm::radians(74.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        ourShader.setMat4("model", tableModel);
+        table.Draw(ourShader);
+
+        // chairs
+        glm::mat4 chairModel1 = glm::mat4(1.0f);
+        chairModel1 = glm::translate(chairModel1,
+                                    programState->chairPosition); // translate it down so it's at the center of the scene
+        chairModel1 = glm::scale(chairModel1, glm::vec3(programState->chairScale));    // it's a bit too big for our scene, so scale it down
+        chairModel1 = glm::rotate(chairModel1, glm::radians(74.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        ourShader.setMat4("model", chairModel1);
+        chair.Draw(ourShader);
+
+        glm::mat4 chairModel2 = glm::mat4(1.0f);
+        chairModel2 = glm::translate(chairModel2,
+                                     programState->chairPosition + glm::vec3(0.0f,0.0f,6.0f)); // translate it down so it's at the center of the scene
+        chairModel2 = glm::scale(chairModel2, glm::vec3(programState->chairScale));    // it's a bit too big for our scene, so scale it down
+        chairModel2 = glm::rotate(chairModel2, glm::radians(74.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        ourShader.setMat4("model", chairModel2);
+        chair.Draw(ourShader);
+
+        // house lamp
+        glm::mat4 houseLampModel = glm::mat4(1.0f);
+        houseLampModel = glm::translate(houseLampModel,
+                                     programState->houseLampPosition); // translate it down so it's at the center of the scene
+        houseLampModel = glm::scale(houseLampModel, glm::vec3(programState->houseLampScale));    // it's a bit too big for our scene, so scale it down
+        houseLampModel = glm::rotate(houseLampModel, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        houseLampModel = glm::rotate(houseLampModel, glm::radians(-76.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ourShader.setMat4("model", houseLampModel);
+        houselamp.Draw(ourShader);
+
+
+        // Front
+        /*glm::mat4 quad = glm::mat4(1.0f);
+        quad = glm::translate(quad, glm::vec3(-35.0f, -85.0f, 25.0f));
+        quad = glm::scale(quad, glm::vec3(4.0f));
+        parallaxShader.setMat4("model", quad);
+        renderQuad();
+
+        // Back
+        quad = glm::mat4(1.0f);
+        quad = glm::translate(quad, glm::vec3(-35.0f, -85.0f, 17.0f));
+        quad = glm::rotate(quad, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        quad = glm::scale(quad, glm::vec3(4.0f));
+        parallaxShader.setMat4("model", quad);
+        renderQuad();
+
+        // Left
+        quad = glm::mat4(1.0f);
+        quad = glm::translate(quad, glm::vec3(-31.0f, -85.0f, 21.0f));
+        quad = glm::rotate(quad, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        quad = glm::scale(quad, glm::vec3(4.0f));
+        parallaxShader.setMat4("model", quad);
+        renderQuad();
+
+        // Right
+        quad = glm::mat4(1.0f);
+        quad = glm::translate(quad, glm::vec3(-39.0f, -85.0f, 21.0f));
+        quad = glm::rotate(quad, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        quad = glm::scale(quad, glm::vec3(4.0f));
+        parallaxShader.setMat4("model", quad);
+        renderQuad();
+
+        // Top
+        quad = glm::mat4(1.0f);
+        quad = glm::translate(quad, glm::vec3(-35.0f, -81.0f, 21.0f));
+        quad = glm::rotate(quad, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        quad = glm::scale(quad, glm::vec3(4.0f));
+        parallaxShader.setMat4("model", quad);
+        renderQuad();*/
+
+        // House floor
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, diffuseMap);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, normalMap);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, heightMap);
+
+        parallaxShader.use();
+
+        parallaxShader.setMat4("projection", projection);
+        parallaxShader.setMat4("view", view);
+        parallaxShader.setVec3("viewPos", programState->camera.Position);
+        parallaxShader.setVec3("lightPos", pointLight.position);
+        parallaxShader.setFloat("heightScale", heightScale);
+
+        glm::mat4 quad = glm::mat4(1.0f);
+        quad = glm::translate(quad, glm::vec3(-5.0f, -76.5f, 11.5f));
+        quad = glm::rotate(quad, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        quad = glm::rotate(quad, glm::radians(-17.5f), glm::vec3(0.0f, 0.0f, 1.0f));
+        quad = glm::scale(quad, glm::vec3(11.0f, 6.7f, 7.5f));
+        parallaxShader.setMat4("model", quad);
+        renderQuad();
+
 
         // rain
         blendingShader.use();
@@ -616,7 +786,6 @@ int main() {
 
         if (programState->ImGuiEnabled)
             DrawImGui(programState);
-
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -789,24 +958,34 @@ unsigned int loadCubemap(vector<std::string> faces)
     return textureID;
 }
 
-unsigned int loadTexture(char const *path)
+unsigned int loadTexture(char const * path, bool gammaCorrection)
 {
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
     int width, height, nrComponents;
     unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
-    if (data){
-        GLenum format;
+    if (data)
+    {
+        GLenum internalFormat;
+        GLenum dataFormat;
         if (nrComponents == 1)
-            format = GL_RED;
+        {
+            internalFormat = dataFormat = GL_RED;
+        }
         else if (nrComponents == 3)
-            format = GL_RGB;
+        {
+            internalFormat = gammaCorrection ? GL_SRGB : GL_RGB;
+            dataFormat = GL_RGB;
+        }
         else if (nrComponents == 4)
-            format = GL_RGBA;
+        {
+            internalFormat = gammaCorrection ? GL_SRGB_ALPHA : GL_RGBA;
+            dataFormat = GL_RGBA;
+        }
 
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -816,9 +995,105 @@ unsigned int loadTexture(char const *path)
 
         stbi_image_free(data);
     }
-    else{
+    else
+    {
         std::cout << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
     }
+
     return textureID;
+}
+
+// renders a 1x1 quad in NDC with manually calculated tangent vectors
+// ------------------------------------------------------------------
+unsigned int quadVAO = 0;
+unsigned int quadVBO;
+void renderQuad()
+{
+    if (quadVAO == 0)
+    {
+        // positions
+        glm::vec3 pos1(-1.0f,  1.0f, 0.0f);
+        glm::vec3 pos2(-1.0f, -1.0f, 0.0f);
+        glm::vec3 pos3( 1.0f, -1.0f, 0.0f);
+        glm::vec3 pos4( 1.0f,  1.0f, 0.0f);
+        // texture coordinates
+        glm::vec2 uv1(0.0f, 1.0f);
+        glm::vec2 uv2(0.0f, 0.0f);
+        glm::vec2 uv3(1.0f, 0.0f);
+        glm::vec2 uv4(1.0f, 1.0f);
+        // normal vector
+        glm::vec3 nm(0.0f, 0.0f, 1.0f);
+
+        // calculate tangent/bitangent vectors of both triangles
+        glm::vec3 tangent1, bitangent1;
+        glm::vec3 tangent2, bitangent2;
+        // triangle 1
+        // ----------
+        glm::vec3 edge1 = pos2 - pos1;
+        glm::vec3 edge2 = pos3 - pos1;
+        glm::vec2 deltaUV1 = uv2 - uv1;
+        glm::vec2 deltaUV2 = uv3 - uv1;
+
+        float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+        tangent1.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+        tangent1.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+        tangent1.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+        tangent1 = glm::normalize(tangent1);
+
+        bitangent1.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+        bitangent1.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+        bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+        bitangent1 = glm::normalize(bitangent1);
+
+        // triangle 2
+        // ----------
+        edge1 = pos3 - pos1;
+        edge2 = pos4 - pos1;
+        deltaUV1 = uv3 - uv1;
+        deltaUV2 = uv4 - uv1;
+
+        f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+        tangent2.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+        tangent2.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+        tangent2.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+        tangent2 = glm::normalize(tangent2);
+
+        bitangent2.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+        bitangent2.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+        bitangent2.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+        bitangent2 = glm::normalize(bitangent2);
+
+        float quadVertices[] = {
+                // positions            // normal         // texcoords  // tangent                          // bitangent
+                pos1.x, pos1.y, pos1.z, nm.x, nm.y, nm.z, uv1.x, uv1.y, tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
+                pos2.x, pos2.y, pos2.z, nm.x, nm.y, nm.z, uv2.x, uv2.y, tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
+                pos3.x, pos3.y, pos3.z, nm.x, nm.y, nm.z, uv3.x, uv3.y, tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
+
+                pos1.x, pos1.y, pos1.z, nm.x, nm.y, nm.z, uv1.x, uv1.y, tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z,
+                pos3.x, pos3.y, pos3.z, nm.x, nm.y, nm.z, uv3.x, uv3.y, tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z,
+                pos4.x, pos4.y, pos4.z, nm.x, nm.y, nm.z, uv4.x, uv4.y, tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z
+        };
+        // configure plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(6 * sizeof(float)));
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(8 * sizeof(float)));
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(11 * sizeof(float)));
+    }
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
 }

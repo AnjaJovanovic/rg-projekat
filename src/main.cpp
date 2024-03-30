@@ -102,6 +102,10 @@ struct ProgramState {
     glm::vec3 houseLampPosition = glm::vec3(-13.0f, -71.0f, 9.0f);
     float houseLampScale = 4.0f;
 
+    glm::vec3 applePosition = glm::vec3(-5.0f, -74.0f, 11.0f);
+    float appleScale = 0.05f;
+
+
     PointLight pointLight;
     PointLight pointLightHouse;
     DirLight dirLight;
@@ -210,10 +214,10 @@ int main() {
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
 
-        // Face culling
-        /*glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glFrontFace(GL_CCW);*/
+    // Face culling
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 
     // build and compile shaders
     // -------------------------
@@ -253,6 +257,10 @@ int main() {
     Model houselamp("resources/objects/light/Light.obj");
     houselamp.SetShaderTextureNamePrefix("material.");
 
+    // apple
+    Model apple("resources/objects/apple/apple.obj");
+    apple.SetShaderTextureNamePrefix("material.");
+
     // Directional light
     // -----------------
     DirLight& dirLight = programState->dirLight;
@@ -271,10 +279,11 @@ int main() {
 
     PointLight& pointLightHouse = programState->pointLightHouse;
     pointLightHouse.position = glm::vec3(-11.8f, -71.0f, 8.0f);
+    pointLightHouse.ambient = glm::vec3(10.0, 10.0, 10.0);
     pointLightHouse.diffuse = glm::vec3(0.3, 0.3, 0.3);
     pointLightHouse.specular = glm::vec3(0.1, 0.1, 0.1);
 
-    pointLightHouse.constant = 1.0f;
+    pointLightHouse.constant = 19.0f;
     pointLightHouse.linear = 0.09f;
     pointLightHouse.quadratic = 0.032f;
 
@@ -480,6 +489,12 @@ int main() {
         ourShader.setFloat("material.shininess", 32.0f);
 
         // house
+        if (lampOn) {
+            pointLightHouse.ambient = glm::vec3(0.5f, 0.5f, 0.0f);
+        } else {
+            pointLightHouse.ambient = glm::vec3(0.0, 0.0, 0.0);
+        }
+
         ourShader.setVec3("pointLightHouse.position", pointLightHouse.position);
         ourShader.setVec3("pointLightHouse.ambient", pointLightHouse.ambient);
         ourShader.setVec3("pointLightHouse.diffuse", pointLightHouse.diffuse);
@@ -490,12 +505,6 @@ int main() {
         ourShader.setVec3("viewPosition", programState->camera.Position);
         ourShader.setVec3("lightPos", pointLightHouse.position);
         ourShader.setFloat("material.shininess", 32.0f);
-
-        if (lampOn) {
-            pointLightHouse.ambient = glm::vec3(0.05f, 0.025f, 0.03f);
-        } else {
-            pointLightHouse.ambient = glm::vec3(0.0, 0.0, 0.0);
-        }
 
 
         // Directional light
@@ -637,6 +646,14 @@ int main() {
         houseLampModel = glm::rotate(houseLampModel, glm::radians(-76.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         ourShader.setMat4("model", houseLampModel);
         houselamp.Draw(ourShader);
+
+        //apple
+        glm::mat4 appleModel = glm::mat4(1.0f);
+        appleModel = glm::translate(appleModel,
+                                        programState->applePosition); // translate it down so it's at the center of the scene
+        appleModel = glm::scale(appleModel, glm::vec3(programState->appleScale));    // it's a bit too big for our scene, so scale it down
+        ourShader.setMat4("model", appleModel);
+        apple.Draw(ourShader);
 
 
         // Front

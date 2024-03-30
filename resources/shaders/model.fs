@@ -36,6 +36,7 @@ in vec3 TangentFragPos;
 in vec3 TangentViewPos;
 
 uniform PointLight pointLight;
+uniform PointLight pointLightHouse;
 uniform DirLight dirLight;
 uniform Material material;
 
@@ -87,5 +88,6 @@ void main()
     vec3 viewDir = normalize(TangentViewPos - TangentFragPos);
     vec3 result = CalcDirLight(dirLight, normal, viewDir);
     result += CalcPointLight(pointLight, normal, TangentFragPos, viewDir);
+    result += CalcPointLight(pointLightHouse, normal, TangentFragPos, viewDir);
     FragColor = vec4(result, 1.0);
 }

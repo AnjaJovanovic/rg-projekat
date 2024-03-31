@@ -1,5 +1,6 @@
 Projekat iz predmeta Računarska Grafika na Matematičkom fakultetu, Univeryiteta u Beogradu.
-Korišćen skelet projekta `https://github.com/matf-racunarska-grafika/project_base.git`
+
+[Skelet projekta](https://github.com/matf-racunarska-grafika/project_base.git)
 ---------------------
 # Komande
 

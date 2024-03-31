@@ -5,7 +5,9 @@ Projekat iz predmeta Računarska Grafika na Matematičkom fakultetu, Univerzitet
 
 `F1` - on/off imgui
 
-`P`  - on/off pointLight
+`P`  - on/off pointLight outdoor
+
+`O`  - on/off pointLight indoor
 
 `Q`  - lower heightScale for parallax mapping
 
@@ -14,6 +16,8 @@ Projekat iz predmeta Računarska Grafika na Matematičkom fakultetu, Univerzitet
 `R`  - change weather (sun/rain/storm)
 
 `C`  - plane crush
+
+`M`  - on/off cursor
 
 `W`  - move camera forward
 

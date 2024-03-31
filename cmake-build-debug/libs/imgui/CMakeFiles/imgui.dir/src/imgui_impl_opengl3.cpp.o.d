@@ -1,8 +1,8 @@
 libs/imgui/CMakeFiles/imgui.dir/src/imgui_impl_opengl3.cpp.o: \
- /home/anja/Desktop/rg/rg-projekat/libs/imgui/src/imgui_impl_opengl3.cpp \
+ /home/anja/Desktop/rg-projekat/libs/imgui/src/imgui_impl_opengl3.cpp \
  /usr/include/stdc-predef.h \
- /home/anja/Desktop/rg/rg-projekat/libs/imgui/include/imgui.h \
- /home/anja/Desktop/rg/rg-projekat/libs/imgui/include/imconfig.h \
+ /home/anja/Desktop/rg-projekat/libs/imgui/include/imgui.h \
+ /home/anja/Desktop/rg-projekat/libs/imgui/include/imconfig.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/float.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdarg.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h /usr/include/string.h \
@@ -20,7 +20,7 @@ libs/imgui/CMakeFiles/imgui.dir/src/imgui_impl_opengl3.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
  /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
  /usr/include/assert.h \
- /home/anja/Desktop/rg/rg-projekat/libs/imgui/include/imgui_impl_opengl3.h \
+ /home/anja/Desktop/rg-projekat/libs/imgui/include/imgui_impl_opengl3.h \
  /usr/include/stdio.h /usr/include/x86_64-linux-gnu/bits/types.h \
  /usr/include/x86_64-linux-gnu/bits/typesizes.h \
  /usr/include/x86_64-linux-gnu/bits/time64.h \
@@ -40,5 +40,5 @@ libs/imgui/CMakeFiles/imgui.dir/src/imgui_impl_opengl3.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/wchar.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
- /home/anja/Desktop/rg/rg-projekat/libs/glad/include/glad/glad.h \
- /home/anja/Desktop/rg/rg-projekat/libs/glad/include/KHR/khrplatform.h
+ /home/anja/Desktop/rg-projekat/libs/glad/include/glad/glad.h \
+ /home/anja/Desktop/rg-projekat/libs/glad/include/KHR/khrplatform.h

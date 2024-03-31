@@ -1,8 +1,7 @@
 CMakeFiles/STB_IMAGE.dir/libs/stb_image.cpp.o: \
- /home/anja/Desktop/rg/rg-projekat/libs/stb_image.cpp \
+ /home/anja/Desktop/rg-projekat/libs/stb_image.cpp \
  /usr/include/stdc-predef.h \
- /home/anja/Desktop/rg/rg-projekat/include/stb_image.h \
- /usr/include/stdio.h \
+ /home/anja/Desktop/rg-projekat/include/stb_image.h /usr/include/stdio.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \

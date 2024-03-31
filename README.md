@@ -1,4 +1,4 @@
-Projekat iz predmeta Računarska Grafika na Matematičkom fakultetu, Univeryiteta u Beogradu.
+Projekat iz predmeta Računarska Grafika na Matematičkom fakultetu, Univerziteta u Beogradu.
 
 ---------------------
 # Komande
@@ -63,3 +63,14 @@ Projekat iz predmeta Računarska Grafika na Matematičkom fakultetu, Univeryitet
 
 [Skelet projekta](https://github.com/matf-racunarska-grafika/project_base.git)
 
+--------------------
+
+# Galerija
+
+![image](./images/image1.png)
+![image](./images/image2.png)
+![image](./images/image3.png)
+![image](./images/image4.png)
+![image](./images/image5.png)
+![image](./images/image6.png)
+![image](./images/image7.png)

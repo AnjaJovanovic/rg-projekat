@@ -1,5 +1,5 @@
 libs/glad/CMakeFiles/glad.dir/src/glad.c.o: \
- /home/anja/Desktop/rg/rg-projekat/libs/glad/src/glad.c \
+ /home/anja/Desktop/rg-projekat/libs/glad/src/glad.c \
  /usr/include/stdc-predef.h /usr/include/stdio.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -51,8 +51,8 @@ libs/glad/CMakeFiles/glad.dir/src/glad.c.o: \
  /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
  /usr/include/strings.h \
- /home/anja/Desktop/rg/rg-projekat/libs/glad/include/glad/glad.h \
- /home/anja/Desktop/rg/rg-projekat/libs/glad/include/KHR/khrplatform.h \
+ /home/anja/Desktop/rg-projekat/libs/glad/include/glad/glad.h \
+ /home/anja/Desktop/rg-projekat/libs/glad/include/KHR/khrplatform.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/wchar.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h /usr/include/dlfcn.h \

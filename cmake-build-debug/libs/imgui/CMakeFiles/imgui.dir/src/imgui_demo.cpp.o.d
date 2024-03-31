@@ -1,8 +1,8 @@
 libs/imgui/CMakeFiles/imgui.dir/src/imgui_demo.cpp.o: \
- /home/anja/Desktop/rg/rg-projekat/libs/imgui/src/imgui_demo.cpp \
+ /home/anja/Desktop/rg-projekat/libs/imgui/src/imgui_demo.cpp \
  /usr/include/stdc-predef.h \
- /home/anja/Desktop/rg/rg-projekat/libs/imgui/include/imgui.h \
- /home/anja/Desktop/rg/rg-projekat/libs/imgui/include/imconfig.h \
+ /home/anja/Desktop/rg-projekat/libs/imgui/include/imgui.h \
+ /home/anja/Desktop/rg-projekat/libs/imgui/include/imconfig.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/float.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdarg.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h /usr/include/string.h \

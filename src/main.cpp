@@ -32,6 +32,7 @@ bool sunny = true;
 bool storm = false;
 
 bool lampOn = true;
+bool houseLampOn = false;
 
 // airplane settings
 bool planeCrash = false;
@@ -87,7 +88,7 @@ struct ProgramState {
     glm::vec3 airplanePosition = glm::vec3(200.0f, 250.0f, 30.0f);
     float airplaneScale = 3.5f;
 
-    glm::vec3 boatPosition = glm::vec3(100.0f, -97.0f, 120.0f);
+    glm::vec3 boatPosition = glm::vec3(80.0f, -97.0f, 120.0f);
     float boatScale = 1.0f;
 
     glm::vec3 lampPosition = glm::vec3(-10.0f, -80.0f, -10.0f);
@@ -280,8 +281,8 @@ int main() {
     PointLight& pointLightHouse = programState->pointLightHouse;
     pointLightHouse.position = glm::vec3(-11.8f, -71.0f, 8.0f);
     pointLightHouse.ambient = glm::vec3(10.0, 10.0, 10.0);
-    pointLightHouse.diffuse = glm::vec3(0.3, 0.3, 0.3);
-    pointLightHouse.specular = glm::vec3(0.1, 0.1, 0.1);
+    pointLightHouse.diffuse = glm::vec3(10.3, 10.3, 10.3);
+    pointLightHouse.specular = glm::vec3(5.1, 5.1, 5.1);
 
     pointLightHouse.constant = 19.0f;
     pointLightHouse.linear = 0.09f;
@@ -472,7 +473,7 @@ int main() {
         // -----------
         //outdoor
         if (lampOn) {
-            pointLight.ambient = glm::vec3(10.0, 10.0, 10.0);
+            pointLight.ambient = glm::vec3(8.0, 8.0, 8.0);
         } else {
             pointLight.ambient = glm::vec3(0.0, 0.0, 0.0);
         }
@@ -488,9 +489,9 @@ int main() {
         ourShader.setVec3("lightPos", pointLight.position);
         ourShader.setFloat("material.shininess", 32.0f);
 
-        // house
-        if (lampOn) {
-            pointLightHouse.ambient = glm::vec3(0.5f, 0.5f, 0.0f);
+        // indoor
+        if (houseLampOn) {
+            pointLightHouse.ambient = glm::vec3(2.5f, 2.5f, 0.0f);
         } else {
             pointLightHouse.ambient = glm::vec3(0.0, 0.0, 0.0);
         }
@@ -589,7 +590,7 @@ int main() {
         boatModel = glm::translate(boatModel,
                                    programState->boatPosition); // translate it down so it's at the center of the scene
         boatModel = glm::scale(boatModel, glm::vec3(programState->boatScale));    // it's a bit too big for our scene, so scale it down
-        boatModel = glm::rotate(boatModel, glm::radians(-35.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        boatModel = glm::rotate(boatModel, glm::radians(-60.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         ourShader.setMat4("model", boatModel);
         boat.Draw(ourShader);
 
@@ -896,6 +897,12 @@ void DrawImGui(ProgramState *programState) {
         ImGui::DragFloat("pointLight.constant", &programState->pointLight.constant, 0.05, 0.0, 1.0);
         ImGui::DragFloat("pointLight.linear", &programState->pointLight.linear, 0.05, 0.0, 1.0);
         ImGui::DragFloat("pointLight.quadratic", &programState->pointLight.quadratic, 0.05, 0.0, 1.0);
+        ImGui::Bullet();
+        ImGui::Text("C - Crush plane");
+        ImGui::Bullet();
+        ImGui::Text("P - ON/OFF pointLight");
+        ImGui::Bullet();
+        ImGui::Text("R - Change weather");
         ImGui::End();
     }
 
@@ -905,6 +912,7 @@ void DrawImGui(ProgramState *programState) {
         ImGui::Text("Camera position: (%f, %f, %f)", c.Position.x, c.Position.y, c.Position.z);
         ImGui::Text("(Yaw, Pitch): (%f, %f)", c.Yaw, c.Pitch);
         ImGui::Text("Camera front: (%f, %f, %f)", c.Front.x, c.Front.y, c.Front.z);
+        ImGui::DragFloat("Movement Speed", (float *) &programState->camera.MovementSpeed, 0.5f, 0.5f, 50.0f);
         ImGui::Checkbox("Camera mouse update", &programState->CameraMouseMovementUpdateEnabled);
         ImGui::End();
     }
@@ -923,6 +931,15 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
     }
+
+    if (key == GLFW_KEY_M && action == GLFW_PRESS && programState->ImGuiEnabled) {
+        programState->CameraMouseMovementUpdateEnabled = !programState->CameraMouseMovementUpdateEnabled;
+        if(programState->CameraMouseMovementUpdateEnabled == true)
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        else
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+
     if (key == GLFW_KEY_R && action == GLFW_PRESS) {
         if (rainy) {
             rainy = false;
@@ -935,18 +952,26 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             sunny = true;
         }
     }
+
     if (key == GLFW_KEY_P && action == GLFW_PRESS) {
         lampOn = !lampOn;
     }
+
+    if (key == GLFW_KEY_O && action == GLFW_PRESS) {
+        houseLampOn = !houseLampOn;
+    }
+
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
         planeCrash = !planeCrash;
     }
+
     if (key == GLFW_KEY_Q && action == GLFW_PRESS){
         if (heightScale > 0.0f)
             heightScale -= 0.005f;
         else
             heightScale = 0.0f;
     }
+
     if (key == GLFW_KEY_E && action == GLFW_PRESS){
         if (heightScale < 1.0f)
             heightScale += 0.005f;

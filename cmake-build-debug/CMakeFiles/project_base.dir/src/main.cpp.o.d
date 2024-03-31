@@ -1,8 +1,7 @@
 CMakeFiles/project_base.dir/src/main.cpp.o: \
- /home/anja/Desktop/rg/rg-projekat/src/main.cpp \
- /usr/include/stdc-predef.h \
- /home/anja/Desktop/rg/rg-projekat/libs/imgui/include/imgui.h \
- /home/anja/Desktop/rg/rg-projekat/libs/imgui/include/imconfig.h \
+ /home/anja/Desktop/rg-projekat/src/main.cpp /usr/include/stdc-predef.h \
+ /home/anja/Desktop/rg-projekat/libs/imgui/include/imgui.h \
+ /home/anja/Desktop/rg-projekat/libs/imgui/include/imconfig.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/float.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdarg.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h /usr/include/string.h \
@@ -20,10 +19,10 @@ CMakeFiles/project_base.dir/src/main.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
  /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
  /usr/include/assert.h \
- /home/anja/Desktop/rg/rg-projekat/libs/imgui/include/imgui_impl_glfw.h \
- /home/anja/Desktop/rg/rg-projekat/libs/imgui/include/imgui_impl_opengl3.h \
- /home/anja/Desktop/rg/rg-projekat/libs/glad/include/glad/glad.h \
- /home/anja/Desktop/rg/rg-projekat/libs/glad/include/KHR/khrplatform.h \
+ /home/anja/Desktop/rg-projekat/libs/imgui/include/imgui_impl_glfw.h \
+ /home/anja/Desktop/rg-projekat/libs/imgui/include/imgui_impl_opengl3.h \
+ /home/anja/Desktop/rg-projekat/libs/glad/include/glad/glad.h \
+ /home/anja/Desktop/rg-projekat/libs/glad/include/KHR/khrplatform.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/types.h \
  /usr/include/x86_64-linux-gnu/bits/typesizes.h \
@@ -246,7 +245,7 @@ CMakeFiles/project_base.dir/src/main.cpp.o: \
  /usr/include/glm/ext/vector_uint1.hpp \
  /usr/include/glm/ext/vector_uint1_sized.hpp /usr/include/c++/11/cstring \
  /usr/include/glm/gtc/type_ptr.inl \
- /home/anja/Desktop/rg/rg-projekat/include/learnopengl/filesystem.h \
+ /home/anja/Desktop/rg-projekat/include/learnopengl/filesystem.h \
  /usr/include/c++/11/string /usr/include/c++/11/bits/stringfwd.h \
  /usr/include/c++/11/bits/memoryfwd.h \
  /usr/include/c++/11/bits/char_traits.h \
@@ -320,8 +319,8 @@ CMakeFiles/project_base.dir/src/main.cpp.o: \
  /usr/include/c++/11/bits/functional_hash.h \
  /usr/include/c++/11/bits/hash_bytes.h \
  /usr/include/c++/11/bits/basic_string.tcc \
- /home/anja/Desktop/rg/rg-projekat/cmake-build-debug/configuration/root_directory.h \
- /home/anja/Desktop/rg/rg-projekat/include/learnopengl/shader.h \
+ /home/anja/Desktop/rg-projekat/cmake-build-debug/configuration/root_directory.h \
+ /home/anja/Desktop/rg-projekat/include/learnopengl/shader.h \
  /usr/include/c++/11/fstream /usr/include/c++/11/istream \
  /usr/include/c++/11/ios /usr/include/c++/11/exception \
  /usr/include/c++/11/bits/exception_ptr.h \
@@ -348,14 +347,14 @@ CMakeFiles/project_base.dir/src/main.cpp.o: \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h \
  /usr/include/c++/11/bits/fstream.tcc /usr/include/c++/11/sstream \
  /usr/include/c++/11/bits/sstream.tcc /usr/include/c++/11/iostream \
- /home/anja/Desktop/rg/rg-projekat/include/common.h \
- /home/anja/Desktop/rg/rg-projekat/include/learnopengl/camera.h \
+ /home/anja/Desktop/rg-projekat/include/common.h \
+ /home/anja/Desktop/rg-projekat/include/learnopengl/camera.h \
  /usr/include/c++/11/vector /usr/include/c++/11/bits/stl_uninitialized.h \
  /usr/include/c++/11/bits/stl_vector.h \
  /usr/include/c++/11/bits/stl_bvector.h \
  /usr/include/c++/11/bits/vector.tcc \
- /home/anja/Desktop/rg/rg-projekat/include/learnopengl/model.h \
- /home/anja/Desktop/rg/rg-projekat/include/stb_image.h \
+ /home/anja/Desktop/rg-projekat/include/learnopengl/model.h \
+ /home/anja/Desktop/rg-projekat/include/stb_image.h \
  /usr/include/assimp/Importer.hpp /usr/include/assimp/types.h \
  /usr/include/assimp/defs.h /usr/include/assimp/config.h \
  /usr/include/assimp/vector2.h /usr/include/assimp/vector3.h \
@@ -378,7 +377,7 @@ CMakeFiles/project_base.dir/src/main.cpp.o: \
  /usr/include/assimp/camera.h /usr/include/assimp/material.h \
  /usr/include/assimp/material.inl /usr/include/assimp/anim.h \
  /usr/include/assimp/metadata.h /usr/include/assimp/postprocess.h \
- /home/anja/Desktop/rg/rg-projekat/include/learnopengl/mesh.h \
+ /home/anja/Desktop/rg-projekat/include/learnopengl/mesh.h \
  /usr/include/c++/11/map /usr/include/c++/11/bits/stl_tree.h \
  /usr/include/c++/11/ext/aligned_buffer.h \
  /usr/include/c++/11/bits/stl_map.h /usr/include/c++/11/tuple \

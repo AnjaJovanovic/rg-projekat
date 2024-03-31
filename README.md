@@ -1,6 +1,5 @@
 Projekat iz predmeta Računarska Grafika na Matematičkom fakultetu, Univeryiteta u Beogradu.
 
-[Skelet projekta](https://github.com/matf-racunarska-grafika/project_base.git)
 ---------------------
 # Komande
 
@@ -44,9 +43,6 @@ Projekat iz predmeta Računarska Grafika na Matematičkom fakultetu, Univeryitet
 
 <br>
 
-
-https://github.com/AnjaJovanovic/rg-projekat.git
-
 # Uputstvo
 1. `git clone https://github.com/AnjaJovanovic/rg-projekat.git`
 2. Main se nalazi u src/main.cpp
@@ -64,3 +60,6 @@ https://github.com/AnjaJovanovic/rg-projekat.git
 - [Street lamp](https://free3d.com/3d-model/street-lamp-40556.html)
 - [Indoor lamp](https://www.turbosquid.com/3d-models/3d-light-1-model-2106876)
 ---------------
+
+[Skelet projekta](https://github.com/matf-racunarska-grafika/project_base.git)
+

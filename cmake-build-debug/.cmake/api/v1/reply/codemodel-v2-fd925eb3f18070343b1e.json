@@ -80,28 +80,28 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "STB_IMAGE::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-STB_IMAGE-Debug-c4019426562fc61e8e4f.json",
+					"jsonFile" : "target-STB_IMAGE-Debug-b39b5826d7acb1414706.json",
 					"name" : "STB_IMAGE",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 1,
 					"id" : "glad::@394eb3637a8e70cb7dd5",
-					"jsonFile" : "target-glad-Debug-cbf4af8588895cca1469.json",
+					"jsonFile" : "target-glad-Debug-76a3ab05bc7b7a236797.json",
 					"name" : "glad",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 2,
 					"id" : "imgui::@8273e96cb584335637bd",
-					"jsonFile" : "target-imgui-Debug-d2e14fde0e3383ee0ff0.json",
+					"jsonFile" : "target-imgui-Debug-127aa3d1771724f1ff91.json",
 					"name" : "imgui",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "project_base::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-project_base-Debug-4d0f691fcb76110ec288.json",
+					"jsonFile" : "target-project_base-Debug-b4236f74f17c3696e1da.json",
 					"name" : "project_base",
 					"projectIndex" : 0
 				}
@@ -111,8 +111,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/anja/Desktop/rg-projekat/cmake-build-debug",
-		"source" : "/home/anja/Desktop/rg-projekat"
+		"build" : "/home/anja/Desktop/rg/rg-projekat/cmake-build-debug",
+		"source" : "/home/anja/Desktop/rg/rg-projekat"
 	},
 	"version" : 
 	{

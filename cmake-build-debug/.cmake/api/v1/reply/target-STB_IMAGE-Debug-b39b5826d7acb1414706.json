@@ -59,11 +59,11 @@
 			[
 				{
 					"backtrace" : 2,
-					"path" : "/home/anja/Desktop/rg-projekat/cmake-build-debug/configuration"
+					"path" : "/home/anja/Desktop/rg/rg-projekat/cmake-build-debug/configuration"
 				},
 				{
 					"backtrace" : 3,
-					"path" : "/home/anja/Desktop/rg-projekat/include"
+					"path" : "/home/anja/Desktop/rg/rg-projekat/include"
 				}
 			],
 			"language" : "CXX",

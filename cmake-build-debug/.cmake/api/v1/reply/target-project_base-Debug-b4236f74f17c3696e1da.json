@@ -2,7 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "/home/anja/Desktop/rg-projekat/project_base"
+			"path" : "/home/anja/Desktop/rg/rg-projekat/project_base"
 		}
 	],
 	"backtrace" : 1,
@@ -95,19 +95,19 @@
 			[
 				{
 					"backtrace" : 7,
-					"path" : "/home/anja/Desktop/rg-projekat/cmake-build-debug/configuration"
+					"path" : "/home/anja/Desktop/rg/rg-projekat/cmake-build-debug/configuration"
 				},
 				{
 					"backtrace" : 8,
-					"path" : "/home/anja/Desktop/rg-projekat/include"
+					"path" : "/home/anja/Desktop/rg/rg-projekat/include"
 				},
 				{
 					"backtrace" : 2,
-					"path" : "/home/anja/Desktop/rg-projekat/libs/glad/include"
+					"path" : "/home/anja/Desktop/rg/rg-projekat/libs/glad/include"
 				},
 				{
 					"backtrace" : 2,
-					"path" : "/home/anja/Desktop/rg-projekat/libs/imgui/include"
+					"path" : "/home/anja/Desktop/rg/rg-projekat/libs/imgui/include"
 				}
 			],
 			"language" : "CXX",

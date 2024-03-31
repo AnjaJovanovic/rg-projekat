@@ -941,6 +941,18 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
         planeCrash = !planeCrash;
     }
+    if (key == GLFW_KEY_Q && action == GLFW_PRESS){
+        if (heightScale > 0.0f)
+            heightScale -= 0.005f;
+        else
+            heightScale = 0.0f;
+    }
+    if (key == GLFW_KEY_E && action == GLFW_PRESS){
+        if (heightScale < 1.0f)
+            heightScale += 0.005f;
+        else
+            heightScale = 1.0f;
+    }
 }
 
 unsigned int loadCubemap(vector<std::string> faces)

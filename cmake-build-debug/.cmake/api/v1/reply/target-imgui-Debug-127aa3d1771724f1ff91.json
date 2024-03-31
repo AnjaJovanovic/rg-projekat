@@ -71,11 +71,11 @@
 			[
 				{
 					"backtrace" : 4,
-					"path" : "/home/anja/Desktop/rg-projekat/libs/imgui/include"
+					"path" : "/home/anja/Desktop/rg/rg-projekat/libs/imgui/include"
 				},
 				{
 					"backtrace" : 2,
-					"path" : "/home/anja/Desktop/rg-projekat/libs/glad/include"
+					"path" : "/home/anja/Desktop/rg/rg-projekat/libs/glad/include"
 				}
 			],
 			"language" : "CXX",

@@ -68,7 +68,11 @@ Projekat iz predmeta Računarska Grafika na Matematičkom fakultetu, Univerzitet
 [Skelet projekta](https://github.com/matf-racunarska-grafika/project_base.git)
 
 --------------------
+# Demo video
 
+[![image](./images/yt.png)](https://youtu.be/FxRlKsRY2-Q)
+
+--------------------
 # Galerija
 
 ![image](./images/image1.png)

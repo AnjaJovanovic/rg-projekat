@@ -566,9 +566,7 @@ int main() {
             programState->airplanePosition = currentAirplanePosition;
 
             if (currentAirplanePosition.y > airplaneHeight) {
-                if (currentAirplaneRotation[0][0] > 0 && currentAirplaneRotation[1][1] > 0) {
-                    // Prvi kvadrant
-                } else if (currentAirplaneRotation[0][0] < 0 && currentAirplaneRotation[1][1] > 0) {
+                if (currentAirplaneRotation[0][0] < 0 && currentAirplaneRotation[1][1] > 0) {
                     // Drugi kvadrant
                     glm::mat4 correctionRotation = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
                     airplaneModel *= correctionRotation;
@@ -576,8 +574,6 @@ int main() {
                     // Treći kvadrant
                     glm::mat4 correctionRotation = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
                     airplaneModel *= correctionRotation;
-                } else if (currentAirplaneRotation[0][0] > 0 && currentAirplaneRotation[1][1] < 0) {
-                    // Četvrti kvadrant
                 }
                 currentAirplanePosition += glm::vec3(0.4f, -0.6f, 0.06f);
             }
@@ -588,8 +584,8 @@ int main() {
         // boat
         glm::mat4 boatModel = glm::mat4(1.0f);
         boatModel = glm::translate(boatModel,
-                                   programState->boatPosition); // translate it down so it's at the center of the scene
-        boatModel = glm::scale(boatModel, glm::vec3(programState->boatScale));    // it's a bit too big for our scene, so scale it down
+                                   programState->boatPosition);
+        boatModel = glm::scale(boatModel, glm::vec3(programState->boatScale));
         boatModel = glm::rotate(boatModel, glm::radians(-60.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         ourShader.setMat4("model", boatModel);
         boat.Draw(ourShader);
@@ -597,8 +593,8 @@ int main() {
         // island
         glm::mat4 islandModel = glm::mat4(1.0f);
         islandModel = glm::translate(islandModel,
-                               programState->islandPosition); // translate it down so it's at the center of the scene
-        islandModel = glm::scale(islandModel, glm::vec3(programState->islandScale));    // it's a bit too big for our scene, so scale it down
+                               programState->islandPosition);
+        islandModel = glm::scale(islandModel, glm::vec3(programState->islandScale));
         islandModel = glm::rotate(islandModel, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         ourShader.setMat4("model", islandModel);
         island.Draw(ourShader);
@@ -606,8 +602,8 @@ int main() {
         // lamp
         glm::mat4 lampModel = glm::mat4(1.0f);
         lampModel = glm::translate(lampModel,
-                                     programState->lampPosition); // translate it down so it's at the center of the scene
-        lampModel = glm::scale(lampModel, glm::vec3(programState->lampScale));    // it's a bit too big for our scene, so scale it down
+                                     programState->lampPosition);
+        lampModel = glm::scale(lampModel, glm::vec3(programState->lampScale));
         lampModel = glm::rotate(lampModel, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         ourShader.setMat4("model", lampModel);
         lamp.Draw(ourShader);
@@ -615,8 +611,8 @@ int main() {
         // table
         glm::mat4 tableModel = glm::mat4(1.0f);
         tableModel = glm::translate(tableModel,
-                                   programState->tablePosition); // translate it down so it's at the center of the scene
-        tableModel = glm::scale(tableModel, glm::vec3(programState->tableScale));    // it's a bit too big for our scene, so scale it down
+                                   programState->tablePosition);
+        tableModel = glm::scale(tableModel, glm::vec3(programState->tableScale));
         tableModel = glm::rotate(tableModel, glm::radians(74.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         ourShader.setMat4("model", tableModel);
         table.Draw(ourShader);
@@ -624,16 +620,16 @@ int main() {
         // chairs
         glm::mat4 chairModel1 = glm::mat4(1.0f);
         chairModel1 = glm::translate(chairModel1,
-                                    programState->chairPosition); // translate it down so it's at the center of the scene
-        chairModel1 = glm::scale(chairModel1, glm::vec3(programState->chairScale));    // it's a bit too big for our scene, so scale it down
+                                    programState->chairPosition);
+        chairModel1 = glm::scale(chairModel1, glm::vec3(programState->chairScale));
         chairModel1 = glm::rotate(chairModel1, glm::radians(74.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         ourShader.setMat4("model", chairModel1);
         chair.Draw(ourShader);
 
         glm::mat4 chairModel2 = glm::mat4(1.0f);
         chairModel2 = glm::translate(chairModel2,
-                                     programState->chairPosition + glm::vec3(0.0f,0.0f,6.0f)); // translate it down so it's at the center of the scene
-        chairModel2 = glm::scale(chairModel2, glm::vec3(programState->chairScale));    // it's a bit too big for our scene, so scale it down
+                                     programState->chairPosition + glm::vec3(0.0f,0.0f,6.0f));
+        chairModel2 = glm::scale(chairModel2, glm::vec3(programState->chairScale));
         chairModel2 = glm::rotate(chairModel2, glm::radians(74.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         ourShader.setMat4("model", chairModel2);
         chair.Draw(ourShader);
@@ -641,8 +637,8 @@ int main() {
         // house lamp
         glm::mat4 houseLampModel = glm::mat4(1.0f);
         houseLampModel = glm::translate(houseLampModel,
-                                     programState->houseLampPosition); // translate it down so it's at the center of the scene
-        houseLampModel = glm::scale(houseLampModel, glm::vec3(programState->houseLampScale));    // it's a bit too big for our scene, so scale it down
+                                     programState->houseLampPosition);
+        houseLampModel = glm::scale(houseLampModel, glm::vec3(programState->houseLampScale));
         houseLampModel = glm::rotate(houseLampModel, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         houseLampModel = glm::rotate(houseLampModel, glm::radians(-76.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         ourShader.setMat4("model", houseLampModel);
@@ -651,50 +647,10 @@ int main() {
         //apple
         glm::mat4 appleModel = glm::mat4(1.0f);
         appleModel = glm::translate(appleModel,
-                                        programState->applePosition); // translate it down so it's at the center of the scene
-        appleModel = glm::scale(appleModel, glm::vec3(programState->appleScale));    // it's a bit too big for our scene, so scale it down
+                                        programState->applePosition);
+        appleModel = glm::scale(appleModel, glm::vec3(programState->appleScale));
         ourShader.setMat4("model", appleModel);
         apple.Draw(ourShader);
-
-
-        // Front
-        /*glm::mat4 quad = glm::mat4(1.0f);
-        quad = glm::translate(quad, glm::vec3(-35.0f, -85.0f, 25.0f));
-        quad = glm::scale(quad, glm::vec3(4.0f));
-        parallaxShader.setMat4("model", quad);
-        renderQuad();
-
-        // Back
-        quad = glm::mat4(1.0f);
-        quad = glm::translate(quad, glm::vec3(-35.0f, -85.0f, 17.0f));
-        quad = glm::rotate(quad, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        quad = glm::scale(quad, glm::vec3(4.0f));
-        parallaxShader.setMat4("model", quad);
-        renderQuad();
-
-        // Left
-        quad = glm::mat4(1.0f);
-        quad = glm::translate(quad, glm::vec3(-31.0f, -85.0f, 21.0f));
-        quad = glm::rotate(quad, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        quad = glm::scale(quad, glm::vec3(4.0f));
-        parallaxShader.setMat4("model", quad);
-        renderQuad();
-
-        // Right
-        quad = glm::mat4(1.0f);
-        quad = glm::translate(quad, glm::vec3(-39.0f, -85.0f, 21.0f));
-        quad = glm::rotate(quad, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        quad = glm::scale(quad, glm::vec3(4.0f));
-        parallaxShader.setMat4("model", quad);
-        renderQuad();
-
-        // Top
-        quad = glm::mat4(1.0f);
-        quad = glm::translate(quad, glm::vec3(-35.0f, -81.0f, 21.0f));
-        quad = glm::rotate(quad, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        quad = glm::scale(quad, glm::vec3(4.0f));
-        parallaxShader.setMat4("model", quad);
-        renderQuad();*/
 
         // House floor
         glActiveTexture(GL_TEXTURE0);

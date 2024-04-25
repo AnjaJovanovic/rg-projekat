@@ -43,8 +43,6 @@ Projekat iz predmeta Računarska Grafika na Matematičkom fakultetu, Univerzitet
 # Implementirano iz oblasti B:
 * Normal mapping
 * Parallax mapping
-
-
 <br>
 
 # Uputstvo
